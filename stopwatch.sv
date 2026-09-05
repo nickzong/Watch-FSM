@@ -28,6 +28,7 @@ module stopwatch (
         .inc_min_pulse(), 
         .inc_hr_pulse(), 
         .pause_sec(!running),
-        .ss(ss), .mm(mm), .hh()
+        .ss(ss), .mm(mm), .hh(),
+        .s_carry()
     );
 endmodule

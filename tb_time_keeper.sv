@@ -88,7 +88,7 @@ module tb_time_keeper;
     check_eq(hh, 0, "no change with pause_sec = 1");
     pause_sec = 0;
     
-    // 4. After 40 more ticks, should be 00:01:10
+    // 4. After 40 more ticks, should be 00:01:10, sec_carry signal should fire
     pulse_tick_for(40);
     check_eq(ss, 10, "ss is 10");
     check_eq(mm, 1, "mm is 01");

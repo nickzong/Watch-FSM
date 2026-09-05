@@ -10,10 +10,11 @@ module time_keeper (
   
   output logic[5:0] ss,
   output logic[5:0] mm,
-  output logic[4:0] hh
+  output logic[4:0] hh,
+  output logic s_carry
 );
   
-  logic s_carry, m_carry, h_carry;
+  logic m_carry, h_carry;
   
   mod_counter #(.STEPS(60), .REG_SIZE(6)) u_sec (
     .clk(clk),
