@@ -8,7 +8,7 @@ module mod_counter #(
   input logic clk,
   input logic areset,
   input logic inc, // signal to increment count
-  output logic [REG_SIZE:0] out = 0,
+  output logic [REG_SIZE-1:0] out = 0,
   output logic carry // logic high when wrap around happens
 ); 
   
