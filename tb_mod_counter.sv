@@ -4,13 +4,13 @@ module tb_mod_counter;
   localparam STEPS    = 4; // small steps for simplicity
   localparam REG_SIZE = 2; 
 
-  reg clk = 0;
-  reg areset = 0;
-  reg inc = 0;
-  wire [REG_SIZE:0] out;
-  wire carry;
+  logic clk = 0;
+  logic areset = 0;
+  logic inc = 0;
+  logic [REG_SIZE-1:0] out;
+  logic carry;
 
-  integer errors = 0;
+  int errors = 0;
 
   mod_counter #(.STEPS(STEPS), .REG_SIZE(REG_SIZE)) dut (
     .clk(clk), .areset(areset), .inc(inc), .out(out), .carry(carry)
@@ -38,8 +38,8 @@ module tb_mod_counter;
   endtask
 
   initial begin
-    $dumpfile("tb_mod_counter.vcd");
-    $dumpvars(0, tb_mod_counter);
+    // $dumpfile("tb_mod_counter.vcd");
+    // $dumpvars(0, tb_mod_counter);
 
     // 1. reset behavior
     areset = 1;
