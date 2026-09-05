@@ -1,9 +1,9 @@
 # all module files
-DESIGN = mod_counter.sv time_keeper.sv
-TB = tb_time_keeper.sv # TUNE ME
+DESIGN = mod_counter.sv time_keeper.sv stopwatch.sv
+TB = tb_stopwatch.sv # TUNE ME
 
 VVP_FILE = sim.vvp
-VCD_FILE = tb_time_keeper.vcd
+VCD_FILE = tb_stopwatch.vcd
 
 # Default 
 all: compile run wave

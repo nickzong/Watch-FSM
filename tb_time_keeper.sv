@@ -109,7 +109,7 @@ module tb_time_keeper;
     check_eq(hh, 3, "hh is 03");
     
     if (errors == 0) $display("\nALL CHECKS PASSED");
-    else              $display("\n%0d CHECK(S) FAILED", errors);
+    else   $display("\n%0d CHECK(S) FAILED", errors);
 
     $finish;
   end
