@@ -3,7 +3,7 @@
 module tb_alarm_view;
     // clock
     logic clk = 0;
-    always #5 clk = ~clk; // 10ps clock period
+    always #5 clk = ~clk; // 10ns clock period
 
     // test_clock inputs
     logic clk_rst = 0;
@@ -28,6 +28,10 @@ module tb_alarm_view;
     logic[5:0] alarm_mm;
     logic[4:0] alarm_hh;
 
+    // alarm_ring logic
+    logic silence = 0;
+    logic buzz;
+
     int errors = 0;
 
     time_keeper test_clock ( // drives the "current time" into alarm_view for testing alarm triggering
@@ -41,6 +45,12 @@ module tb_alarm_view;
         .mm(mm), 
         .hh(hh), 
         .s_carry(s_carry)
+    );
+
+    alarm_ring ringer (
+        .trigger_alarm(trigger_alarm),
+        .button_input(silence),
+        .buzz(buzz)
     );
 
     alarm_view dut (
@@ -104,6 +114,13 @@ module tb_alarm_view;
         end
     endtask
 
+    task silence_pulse(); 
+        begin
+            @(negedge clk); silence = 1; #1;
+            @(negedge clk); silence = 0; #1;
+        end
+    endtask
+
     task plus_pulse_for(input int iters);
         begin
             for (int i = 0; i < iters; i++) begin
@@ -132,7 +149,7 @@ module tb_alarm_view;
             pulse_tick_for(59);
             @(negedge clk); tick = 1; #1;
             check_eq(trigger_alarm, exp_trigger, msg);
-            @(negedge clk); tick = 0; #1;
+            @(negedge clk); tick = 0; #10;
         end
     endtask
 
@@ -150,6 +167,7 @@ module tb_alarm_view;
         check_eq(alarm_mm, 0, "alarm_mm is 0 after reset");
         check_eq(alarm_hh, 0, "alarm_hh is 0 after reset");
         check_eq(trigger_alarm, 0, "trigger_alarm low after reset");
+        check_eq(buzz, 0, "buzzer should not fire");
         check_eq(dut.state, 2'b00, "alarm_view state is idle after reset");
         check_eq(dut.armed, 1'b0, "alarm_view armed is 0 after reset");
         clk_rst = 0; alarm_rst = 0;
@@ -165,6 +183,9 @@ module tb_alarm_view;
         tick_to_rollover_and_check("trigger_alarm high at rollover matching alarm 00:00", 1'b1);
         check_eq(mm, 1, "real clock mm advanced to 1 after rollover");
         check_eq(trigger_alarm, 0, "trigger_alarm low again once rollover settles");
+        check_eq(buzz, 1, "buzzer should still be firing without silence signal");
+        silence_pulse();
+        check_eq(buzz, 0, "buzzer should now be silenced");
 
         // 4. reconfigure alarm to 00:01 
         set_alarm(0, 1);
@@ -174,12 +195,16 @@ module tb_alarm_view;
         // 5. real clock rolls 00:01:59 -> 00:02:00: should now match the new alarm
         tick_to_rollover_and_check("trigger_alarm high at rollover matching alarm 00:01", 1'b1);
         check_eq(mm, 2, "real clock mm advanced to 2 after rollover");
+        check_eq(buzz, 1, "buzzer should still be firing without silence signal");
+        silence_pulse();
+        check_eq(buzz, 0, "buzzer should now be silenced");
 
         // 6. matching hh:mm, no sec rollover, must NOT trigger
         clk_rst = 1; @(negedge clk); @(negedge clk); clk_rst = 0;
         inc_min_for(1); // real clock mm: 0 -> 1, matches alarm_mm(1), but no s_carry occurred
         check_eq(mm, 1, "real clock mm fast-forwarded to 1 via inc_min_pulse");
         check_eq(trigger_alarm, 0, "trigger_alarm stays low without a genuine s_carry rollover");
+        check_eq(buzz, 0, "buzzer should not fire");
 
         // 7. set alarm_hh to 2, don't touch min, confirm previously set alarm is stored
         set_alarm(2, 0);
@@ -195,6 +220,9 @@ module tb_alarm_view;
         tick_to_rollover_and_check("trigger_alarm high at rollover matching alarm 02:01", 1'b1);
         check_eq(mm, 2, "real clock mm advanced to 2 after rollover");
         check_eq(hh, 2, "real clock hh still 2 after rollover");
+        check_eq(buzz, 1, "buzzer should still be firing without silence signal");
+        silence_pulse();
+        check_eq(buzz, 0, "buzzer should now be silenced");
 
         // 9. hh mismatch, mm matches, trigger_alarm should not fire
         clk_rst = 1; @(negedge clk); @(negedge clk); clk_rst = 0;
@@ -203,6 +231,7 @@ module tb_alarm_view;
         check_eq(hh, 3, "real clock hh set to 3 (mismatched with alarm_hh=2)");
         check_eq(mm, 1, "real clock mm set to 1 (matches alarm_mm)");
         tick_to_rollover_and_check("trigger_alarm stays low: hh mismatch (3 != 2)", 1'b0);
+        check_eq(buzz, 0, "buzzer should not fire");
 
         // 10. areset does not reset the set-state FSM, only the internal alarm time
         set_state_pulse(); // idle -> set_hr
