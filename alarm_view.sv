@@ -5,7 +5,7 @@ module alarm_view ( // trigger ring when clock time (hh:mm:ss) == alarm time (hh
     input logic set_state, // 
     input logic s_carry, // 1 only on second rollover
     input logic[5:0] mm,
-    input logic[4:0] hh
+    input logic[4:0] hh,
 
     output logic trigger_alarm,
     output logic[5:0] alarm_mm,
@@ -23,10 +23,10 @@ module alarm_view ( // trigger ring when clock time (hh:mm:ss) == alarm time (hh
             state <= 2'b10;
             armed <= 1'b0;
         end else if (state == 2'b10) begin
-            state = 2'b00;
-            armed = 1'b1;
+            state <= 2'b00;
+            armed <= 1'b1;
         end else begin
-            state = 2'b00;
+            state <= 2'b00;
         end
     end
 
@@ -40,6 +40,7 @@ module alarm_view ( // trigger ring when clock time (hh:mm:ss) == alarm time (hh
         .ss(), .mm(alarm_mm), .hh(alarm_hh),
         .s_carry()
     );
+    
+    assign trigger_alarm = s_carry && (mm == alarm_mm) && (hh == alarm_hh);
 
-    assign trigger_alarm = s_carry && (mm == alarm_mm) && (hh == alarm_hh)
 endmodule
