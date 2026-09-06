@@ -16,18 +16,17 @@ module alarm_view ( // trigger ring when clock time (hh:mm:ss) == alarm time (hh
     logic[1:0] state = 2'b00; // cycles alarm_view (00) --> set_hr (01) --> set_min (10) --> confirm alarm (00)
 
     always_ff @(posedge set_state) begin
-        if (state == 2'b00) begin
-            state <= 2'b01;
-            armed <= 1'b0;
-        end else if (state == 2'b01) begin
-            state <= 2'b10;
-            armed <= 1'b0;
-        end else if (state == 2'b10) begin
-            state <= 2'b00;
-            armed <= 1'b1;
-        end else begin
-            state <= 2'b00;
-        end
+        case (state)
+            2'b00: state <= 2'b01;    // alarm_view --> set_hr
+            2'b01: state <= 2'b10;    // set_hr --> set_min
+            2'b10: state <= 2'b00;    // set_min --> alarm_view
+            default: state <= 2'b00;
+        endcase
+    end
+
+    // alarm toggle
+    always_ff @(posedge plus) begin
+        if (state == 2'b00) armed <= ~armed;
     end
 
     time_keeper u_alarm (
@@ -41,6 +40,6 @@ module alarm_view ( // trigger ring when clock time (hh:mm:ss) == alarm time (hh
         .s_carry()
     );
     
-    assign trigger_alarm = s_carry && (mm == alarm_mm) && (hh == alarm_hh);
+    assign trigger_alarm = armed && s_carry && (mm == alarm_mm) && (hh == alarm_hh);
 
 endmodule
