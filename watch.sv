@@ -14,7 +14,8 @@ module watch (
 );
 
     logic[1:0] state = 2'b00;
-    logic[1:0] t_state = 2'b00;
+    logic[1:0] c_state = 2'b00; // tracker for the current clock state
+    logic[1:0] a_state = 2'b00; // tracker for the current alarm state
 
     logic clk_rst = 0; // when in time state, if all three buttons are pressed at once, factory reset everything
     logic trigger_alarm = 0;
@@ -36,10 +37,11 @@ module watch (
             state = 2'b11;
         end else if (b_mode) begin // mode button functions
             // define mode cycle: time (00) --> stopwatch (01) --> alarm (10) --> time (00)
+            // mode switch only allowed in idle states, not in set states
             case (state)
-                2'b00: state = 2'b01;
+                2'b00: if (c_state == 2'b00) state = 2'b01;
                 2'b01: state = 2'b10;
-                2'b10: state = 2'b00;
+                2'b10: if (a_state == 2'b00) state = 2'b00;
                 2'b11: state = 2'b00; // silence alarm, alarm_ring state
                 default: state = 2'b00;
             endcase
@@ -61,17 +63,18 @@ module watch (
     end
     
 
-    time_keeper u_time ( 
+    clock u_clock ( 
         .clk(clk),
-        .areset(clk_rst),
+        .areset(),
         .tick_1Hz(tick_1Hz),
-        .inc_min_pulse(),
-        .inc_hr_pulse(),
+        .plus(),
+        .set(),
         .pause_sec(pause_sec),
+        .s_carry(s_carry),
+        .state(c_state),
         .ss(time_ss),
         .mm(time_mm),
-        .hh(time_hh),
-        .s_carry(s_carry)
+        .hh(time_hh)
     );
 
     stopwatch u_stopwatch (
@@ -92,6 +95,7 @@ module watch (
         .mm(mm),
         .hh(hh),
         .trigger_alarm(trigger_alarm),
+        .state(a_state),
         .alarm_mm(alarm_mm),
         .alarm_hh(alarm_hh)
     );
