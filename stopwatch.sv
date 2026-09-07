@@ -1,6 +1,6 @@
 module stopwatch (
     input logic clk,
-    input logic areset, // plus button
+    input logic areset, // plus button acts as areset in this mode
     input logic tick, // assumed to be a 1Hz signal
     input logic set, // handles start/stop 
 
