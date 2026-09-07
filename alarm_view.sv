@@ -2,7 +2,7 @@ module alarm_view ( // trigger ring when clock time (hh:mm:ss) == alarm time (hh
     input logic clk,
     input logic areset,
     input logic plus, // increments in set state
-    input logic set_state, // 
+    input logic set_state, // set button
     input logic s_carry, // 1 only on second rollover
     input logic[5:0] mm,
     input logic[4:0] hh,
