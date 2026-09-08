@@ -29,6 +29,11 @@ module alarm_view ( // trigger ring when clock time (hh:mm:ss) == alarm time (hh
         if (state == 2'b00) armed <= ~armed;
     end
 
+    always_ff @(posedge areset) begin
+        state <= 2'b00;
+        armed <= 0;
+    end
+
     time_keeper u_alarm (
         .clk(clk), 
         .areset(areset), 
