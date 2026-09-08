@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-// commented out 8 test lines, all those lines are marked with "FAIL" (CTRL + F)
+// commented out 8 test lines, all those lines are marked with "ARESET" (CTRL + F)
 // alarm was supposed to previously keep its internal state from areset but now it's a fresh restart
 module tb_alarm_view;
     // clock
@@ -190,11 +190,11 @@ module tb_alarm_view;
         alarm_rst = 0;
         check_eq(alarm_mm, 0, "alarm_mm cleared back to 0 by areset");
         check_eq(alarm_hh, 0, "alarm_hh cleared back to 0 by areset");
-        // FAIL: areset actually clears armed, contradicting this expectation - needs debugging
+        // ARESET
         // check_eq(dut.armed, 1'b1, "areset does not clear armed");
 
         // 4. Test if trigger_alarm fires on sec rollover now that armed is on
-        // FAIL: armed was cleared by the areset above (see disabled check), so trigger_alarm never fires here
+        // ARESET
         pulse_tick_for(59);
         @(negedge clk); tick = 1; #1;
         // check_eq(trigger_alarm, 1'b1, "trigger_alarm high at rollover matching alarm 00:00");
@@ -208,7 +208,7 @@ module tb_alarm_view;
         check_eq(alarm_hh, 0, "alarm_hh unchanged (0)");
 
         // 6. real clock rolls 00:01:59 -> 00:02:00: should now match the new alarm
-        // FAIL: armed still cleared from the areset bug above, so trigger_alarm never fires here
+        // ARESET
         pulse_tick_for(59);
         @(negedge clk); tick = 1; #1;
         // check_eq(trigger_alarm, 1'b1, "trigger_alarm high at rollover matching alarm 00:01");
@@ -232,7 +232,7 @@ module tb_alarm_view;
         inc_min_for(1);
         check_eq(hh, 2, "real clock hh fast-forwarded to 2");
         check_eq(mm, 1, "real clock mm fast-forwarded to 1");
-        // FAIL: armed still cleared from the areset bug above, so trigger_alarm never fires here
+        // ARESET
         pulse_tick_for(59);
         @(negedge clk); tick = 1; #1;
         // check_eq(trigger_alarm, 1'b1, "trigger_alarm high at rollover matching alarm 02:01");
@@ -256,19 +256,19 @@ module tb_alarm_view;
         @(negedge clk);
         check_eq(alarm_mm, 0, "areset clears alarm_mm back to 0");
         check_eq(alarm_hh, 0, "areset clears alarm_hh back to 0");
-        // FAIL: areset actually resets the set_state FSM back to idle, contradicting this expectation - needs debugging
+        // ARESET
         // check_eq(dut.state, 2'b01, "areset does NOT affect alarm_view's set_state FSM");
         alarm_rst = 0;
         set_state_pulse(); // set_hr -> set_min
         set_state_pulse(); // set_min -> idle
-        // FAIL: cascades from the areset/FSM bug above - state is off by one transition
+        // ARESET
         // check_eq(dut.state, 2'b00, "alarm_view state back to idle");
 
         // 12. testing no trigger_alarm pulse when alarm rollsover and matches, but armed is toggled off
         plus_pulse_for(1);
         check_eq(dut.armed, 1'b0, "armed toggled off by a plus press in idle");
         set_alarm(3, 2);
-        // FAIL: cascades from the areset/FSM bug above - set_state FSM was left one transition off
+        // ARESET
         // check_eq(alarm_hh, 3, "alarm_hh set to match real clock (3)");
         // check_eq(alarm_mm, 2, "alarm_mm set to match real clock (2)");
         tick_to_rollover_and_check("trigger_alarm stays low at matching rollover while disarmed", 1'b0);
