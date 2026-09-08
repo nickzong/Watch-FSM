@@ -22,6 +22,10 @@ module clock (
         endcase
     end
 
+    always_ff @(posedge areset) begin
+        state = 2'b00;
+    end
+
     time_keeper u_time (
         .clk(clk), 
         .areset(areset), 
