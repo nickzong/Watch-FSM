@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-
+// check tb_alarm_view.sv header comment, changed areset behavior
 module tb_clock;
     logic clk = 0;
     logic areset = 0;
@@ -140,11 +140,11 @@ module tb_clock;
         check_eq(ss, 0, "areset clears ss back to 0");
         check_eq(mm, 0, "areset clears mm back to 0");
         check_eq(hh, 0, "areset clears hh back to 0");
-        check_eq(dut.state, 2'b01, "areset does NOT affect clock's set-state FSM");
+        check_eq(dut.state, 2'b00, "state back to TIME after reset");
+        // ARESET
+        // check_eq(dut.state, 2'b01, "areset does NOT affect clock's set-state FSM");
         areset = 0;
-        pulse_set(); // SET_HR --> SET_MIN
-        pulse_set(); // SET_MIN --> TIME
-        check_eq(dut.state, 2'b00, "state back to TIME after full cycle");
+        // check_eq(dut.state, 2'b00, "state back to TIME after full cycle");
 
         if (errors == 0) $display("\nALL CHECKS PASSED");
         else   $display("\n%0d CHECK(S) FAILED", errors);
