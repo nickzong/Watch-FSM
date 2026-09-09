@@ -6,7 +6,6 @@ module tb_clock;
     logic tick_1Hz = 0;
     logic plus = 0;
     logic set = 0;
-    logic pause_sec = 0;
 
     logic s_carry;
     logic[5:0] ss;
@@ -17,8 +16,8 @@ module tb_clock;
 
     clock dut (
         .clk(clk), .areset(areset), .tick_1Hz(tick_1Hz),
-        .plus(plus), .set(set), .pause_sec(pause_sec),
-        .s_carry(s_carry), .ss(ss), .mm(mm), .hh(hh)
+        .plus(plus), .set(set), .s_carry(s_carry), 
+        .ss(ss), .mm(mm), .hh(hh)
     );
 
     always #5 clk = ~clk; // 10ns clock period
@@ -113,26 +112,24 @@ module tb_clock;
         check_eq(hh, 3, "hh untouched while setting min");
         pulse_set(); // SET_MIN --> TIME
 
-        // 8. pause_sec freezes ss on tick_1Hz regardless of set state
-        pause_sec = 1;
-        pulse_tick_for(20);
-        check_eq(ss, 10, "no ss change with pause_sec = 1");
-        check_eq(mm, 3, "no mm change with pause_sec = 1");
-        check_eq(hh, 3, "no hh change with pause_sec = 1");
-        pause_sec = 0;
-
-        // 9. plus presses in SET_HR/SET_MIN increment hh/mm directly, so they still
-        //    take effect even while pause_sec is asserted
-        pause_sec = 1;
+        // 8. Test if time remains unchanged when in set mode (pause_sec functionality)
         pulse_set(); // TIME --> SET_HR
-        plus_pulse_for(1);
-        check_eq(hh, 4, "hh still increments from plus in SET_HR while pause_sec = 1");
-        pause_sec = 0;
+        pulse_tick_for(30);
+        check_eq(hh, 3, "hh has not changed even with 30 tick pulses");
+        check_eq(mm, 3, "mm has not changed even with 30 tick pulses");
+        check_eq(ss, 10, "ss has not changed even with 30 tick pulses");
         pulse_set(); // SET_HR --> SET_MIN
+        pulse_tick_for(30);
+        check_eq(hh, 3, "hh has not changed even with 30 tick pulses");
+        check_eq(mm, 3, "mm has not changed even with 30 tick pulses");
+        check_eq(ss, 10, "ss has not changed even with 30 tick pulses");
         pulse_set(); // SET_MIN --> TIME
+        pulse_tick_for(30);
+        check_eq(hh, 3, "hh has not changed even with 30 tick pulses");
+        check_eq(mm, 3, "mm has not changed even with 30 tick pulses");
+        check_eq(ss, 40, "ss now changes");
 
-        // 10. areset does not reset the set-state FSM, only the time counters
-        //     (mirrors alarm_view's areset behavior)
+        // 9. areset resets everything
         pulse_set(); // TIME --> SET_HR
         areset = 1;
         @(negedge clk);

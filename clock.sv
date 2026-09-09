@@ -4,7 +4,6 @@ module clock (
     input logic tick_1Hz,
     input logic plus,
     input logic set,
-    input logic pause_sec,
     
     output logic s_carry,
     output logic[1:0] state = 2'b00, // cycles time (00) --> set_hr (01) --> set_min (10) --> confirm time (00)
@@ -32,7 +31,7 @@ module clock (
         .tick_1Hz(tick_1Hz),
         .inc_min_pulse(state == 2'b10 && plus), 
         .inc_hr_pulse(state == 2'b01 && plus), 
-        .pause_sec(pause_sec),
+        .pause_sec(state != 2'b00),
         .ss(ss), .mm(mm), .hh(hh),
         .s_carry(s_carry)
     );
