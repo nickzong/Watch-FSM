@@ -8,9 +8,9 @@ module watch (
     input logic clk,
     input logic tick_1Hz,
     input logic blink_en, // 2 Hz signal to drive blinking in set modes
-    input logic b_mode,
-    input logic b_set,
-    input logic b_plus,
+    input logic b_mode_raw,
+    input logic b_set_raw,
+    input logic b_plus_raw,
     
     output logic[5:0] disp_pair1,
     output logic[5:0] disp_pair2,
@@ -35,19 +35,47 @@ module watch (
     logic fact_rst; // when in time state, if all three buttons are pressed at once, factory reset everything
     logic true_mode, true_set, true_plus; // encodes AMSP hierarchy
 
-    // button pulses that stay at 1 for only 1 clk cycle
-    logic b_mode_prev, mode_pulse;
+    // ------ PROCESS BUTTON INPUTS ------
+    logic b_mode, b_mode_prev, mode_pulse;
+    logic b_set, b_set_prev, set_pulse;
+    logic b_plus, b_plus_prev, plus_pulse;
+
+    // filter noisy button inputs
+    debouncer mode_filter (
+        .clk(clk),
+        .areset(fact_rst),
+        .raw(b_mode_raw),
+        .clean(b_mode)
+    );
+    debouncer set_filter (
+        .clk(clk),
+        .areset(fact_rst),
+        .raw(b_set_raw),
+        .clean(b_set)
+    );
+    debouncer plus_filter (
+        .clk(clk),
+        .areset(fact_rst),
+        .raw(b_plus_raw),
+        .clean(b_plus)
+    );
+
+    // create 1 clk cycle wide button pulses to eliminate edge cases caused by button holding
     always_ff @(posedge clk) b_mode_prev <= b_mode;
     assign mode_pulse = b_mode & ~b_mode_prev; // one cycle wide exactly on the rising edge
 
-    logic b_set_prev, set_pulse;
     always_ff @(posedge clk) b_set_prev <= b_set;
     assign set_pulse = b_set & ~b_set_prev; // one cycle wide, exactly on the rising edge
 
-    logic b_plus_prev, plus_pulse;
     always_ff @(posedge clk) b_plus_prev <= b_plus;
     assign plus_pulse = b_plus & ~b_plus_prev; // one cycle wide, exactly on the rising edge
 
+    // true signals go to 1 if the signal is the highest priority in the AMSP hierarchy: async alarm > mode > set > plus
+    assign true_mode = !trigger_alarm & mode_pulse;
+    assign true_set = !trigger_alarm & !mode_pulse & set_pulse;
+    assign true_plus = !trigger_alarm & !mode_pulse & !set_pulse & plus_pulse;
+
+    // ------ Instantiate Submodules ------
     clock u_clock ( 
         .clk(clk),
         .areset(fact_rst),
@@ -83,11 +111,6 @@ module watch (
         .alarm_mm(alarm_mm),
         .alarm_hh(alarm_hh)
     );
-    
-    // true signals go to 1 if the signal is the highest priority in the AMSP hierarchy: async alarm > mode > set > plus
-    assign true_mode = !trigger_alarm & mode_pulse;
-    assign true_set = !trigger_alarm & !mode_pulse & set_pulse;
-    assign true_plus = !trigger_alarm & !mode_pulse & !set_pulse & plus_pulse;
 
     always_comb begin
         next_state = state; // default
