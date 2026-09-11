@@ -13,7 +13,8 @@ module watch (
     input logic b_plus,
     
     output logic[5:0] disp_pair1,
-    output logic[5:0] disp_pair2
+    output logic[5:0] disp_pair2,
+    output logic trigger_alarm
 );
 
     logic[1:0] state, next_state;
@@ -32,7 +33,6 @@ module watch (
 
     // signals for watch mode instances' inputs
     logic fact_rst; // when in time state, if all three buttons are pressed at once, factory reset everything
-    logic trigger_alarm;
     logic true_mode, true_set, true_plus; // encodes AMSP hierarchy
 
     // button pulses that stay at 1 for only 1 clk cycle
