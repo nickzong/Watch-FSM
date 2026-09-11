@@ -6,7 +6,7 @@ module debouncer #(
     input logic areset,
     input logic raw, // noisy input
     
-    output logic clean // filtered 
+    output logic clean = 0 // filtered 
 );
 
     logic[$clog2(THRESHOLD)-1:0] count = 0;
