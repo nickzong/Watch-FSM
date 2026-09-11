@@ -53,7 +53,7 @@ module watch (
         .areset(fact_rst),
         .tick_1Hz(tick_1Hz),
         .plus(true_plus && (state == 2'b00)),
-        .set(true_set && (state == 2'b01)),
+        .set(true_set && (state == 2'b00)),
         .s_carry(s_carry),
         .state(c_state),
         .ss(time_ss),

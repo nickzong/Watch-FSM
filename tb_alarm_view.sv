@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
-// commented out 8 test lines, all those lines are marked with "ARESET" (CTRL + F)
-// alarm was supposed to previously keep its internal state from areset but now it's a fresh restart
+// areset now clears armed, state, and the alarm time -- tests below re-arm/re-set
+// after each areset instead of assuming it survives, matching that intended behavior
 module tb_alarm_view;
     // clock
     logic clk = 0;
@@ -183,21 +183,23 @@ module tb_alarm_view;
         check_eq(dut.state, 2'b00, "alarm_view state back to idle after full cycle");
 
         // clear the alarm time back to 00:00 for the rollover test below;
-        // areset does not touch armed or the set-state FSM
+        // areset now also clears armed and the set-state FSM, so re-arm afterward
         alarm_rst = 1;
         @(negedge clk);
         @(negedge clk);
         alarm_rst = 0;
         check_eq(alarm_mm, 0, "alarm_mm cleared back to 0 by areset");
         check_eq(alarm_hh, 0, "alarm_hh cleared back to 0 by areset");
-        // ARESET
-        // check_eq(dut.armed, 1'b1, "areset does not clear armed");
+        check_eq(dut.armed, 1'b0, "areset clears armed back to 0");
+
+        // re-arm for the rollover tests below (armed does not survive areset anymore)
+        plus_pulse_for(1);
+        check_eq(dut.armed, 1'b1, "re-armed after reset for the rollover tests below");
 
         // 4. Test if trigger_alarm fires on sec rollover now that armed is on
-        // ARESET
         pulse_tick_for(59);
         @(negedge clk); tick = 1; #1;
-        // check_eq(trigger_alarm, 1'b1, "trigger_alarm high at rollover matching alarm 00:00");
+        check_eq(trigger_alarm, 1'b1, "trigger_alarm high at rollover matching alarm 00:00");
         @(negedge clk); tick = 0; #1;
         check_eq(mm, 1, "real clock mm advanced to 1 after rollover");
         check_eq(trigger_alarm, 0, "trigger_alarm low again once rollover settles");
@@ -208,10 +210,9 @@ module tb_alarm_view;
         check_eq(alarm_hh, 0, "alarm_hh unchanged (0)");
 
         // 6. real clock rolls 00:01:59 -> 00:02:00: should now match the new alarm
-        // ARESET
         pulse_tick_for(59);
         @(negedge clk); tick = 1; #1;
-        // check_eq(trigger_alarm, 1'b1, "trigger_alarm high at rollover matching alarm 00:01");
+        check_eq(trigger_alarm, 1'b1, "trigger_alarm high at rollover matching alarm 00:01");
         @(negedge clk); tick = 0; #1;
         check_eq(mm, 2, "real clock mm advanced to 2 after rollover");
 
@@ -232,10 +233,9 @@ module tb_alarm_view;
         inc_min_for(1);
         check_eq(hh, 2, "real clock hh fast-forwarded to 2");
         check_eq(mm, 1, "real clock mm fast-forwarded to 1");
-        // ARESET
         pulse_tick_for(59);
         @(negedge clk); tick = 1; #1;
-        // check_eq(trigger_alarm, 1'b1, "trigger_alarm high at rollover matching alarm 02:01");
+        check_eq(trigger_alarm, 1'b1, "trigger_alarm high at rollover matching alarm 02:01");
         @(negedge clk); tick = 0; #1;
         check_eq(mm, 2, "real clock mm advanced to 2 after rollover");
         check_eq(hh, 2, "real clock hh still 2 after rollover");
@@ -248,7 +248,7 @@ module tb_alarm_view;
         check_eq(mm, 1, "real clock mm set to 1 (matches alarm_mm)");
         tick_to_rollover_and_check("trigger_alarm stays low: hh mismatch (3 != 2)", 1'b0);
 
-        // 11. areset does not reset the set-state FSM, only the internal alarm time
+        // 11. areset now resets the set-state FSM back to idle too, not just the alarm time
         set_state_pulse(); // idle -> set_hr
         check_eq(dut.state, 2'b01, "alarm_view state is set_hr");
         alarm_rst = 1;
@@ -256,21 +256,17 @@ module tb_alarm_view;
         @(negedge clk);
         check_eq(alarm_mm, 0, "areset clears alarm_mm back to 0");
         check_eq(alarm_hh, 0, "areset clears alarm_hh back to 0");
-        // ARESET
-        // check_eq(dut.state, 2'b01, "areset does NOT affect alarm_view's set_state FSM");
+        check_eq(dut.state, 2'b00, "areset resets alarm_view's set-state FSM back to idle");
         alarm_rst = 0;
-        set_state_pulse(); // set_hr -> set_min
-        set_state_pulse(); // set_min -> idle
-        // ARESET
-        // check_eq(dut.state, 2'b00, "alarm_view state back to idle");
+        // (no extra set_state_pulse()s needed here anymore -- state is already idle
+        // right out of the areset above, so pressing set twice more would actually
+        // walk it to set_min instead of leaving it at idle)
 
-        // 12. testing no trigger_alarm pulse when alarm rollsover and matches, but armed is toggled off
-        plus_pulse_for(1);
-        check_eq(dut.armed, 1'b0, "armed toggled off by a plus press in idle");
+        // 12. testing no trigger_alarm pulse when alarm rolls over and matches, but disarmed
+        check_eq(dut.armed, 1'b0, "alarm_view starts disarmed after the areset above");
         set_alarm(3, 2);
-        // ARESET
-        // check_eq(alarm_hh, 3, "alarm_hh set to match real clock (3)");
-        // check_eq(alarm_mm, 2, "alarm_mm set to match real clock (2)");
+        check_eq(alarm_hh, 3, "alarm_hh set to match real clock (3)");
+        check_eq(alarm_mm, 2, "alarm_mm set to match real clock (2)");
         tick_to_rollover_and_check("trigger_alarm stays low at matching rollover while disarmed", 1'b0);
 
         if (errors == 0) $display("\nALL CHECKS PASSED");
