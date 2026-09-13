@@ -12,7 +12,7 @@ An 8-state FSM (`TIME`, `SET_HR`, `SET_MIN`, `STOPWATCH`, `ALARM_VIEW`, `ALARM_S
 
 Three buttons (Mode / Set / Plus) are reused contextually across modes, plus an asynchronous alarm input. Simultaneous inputs are resolved deterministically with a priority-encoded scheme: **alarm > mode > set > plus (AMSP)**.
 
-See [`state_diagrams_v1.pdf`](./state_diagrams_v1.pdf) for the full state diagram.
+See [`watch_diagrams.pdf`](./watch_diagrams.pdf) for the full state diagram.
 
 ## Design
 
