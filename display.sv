@@ -21,7 +21,7 @@ module display (
     localparam logic[6:0] EIGHT = 7'b1111111;
     localparam logic[6:0] NINE  = 7'b1110011;
 
-    always_ff @(posedge clk, posedge blink_en) begin
+    always_ff @(posedge clk) begin
         case (top_pair)
             6'd0: begin
                 top_tens_7sd = ZERO;
@@ -267,6 +267,11 @@ module display (
             6'd59: begin
                 top_tens_7sd = FIVE;
                 top_ones_7sd = NINE;
+            end
+
+            6'b111111: begin // blink state
+                top_tens_7sd = 7'b0000000;
+                top_ones_7sd = 7'b0000000;
             end
             default: begin
                 top_tens_7sd = ZERO;
@@ -520,12 +525,16 @@ module display (
                 bottom_tens_7sd = FIVE;
                 bottom_ones_7sd = NINE;
             end
+
+            6'b111111: begin // blink state
+                bottom_tens_7sd = 7'b0000000;
+                bottom_ones_7sd = 7'b0000000;
+            end
             default: begin
                 bottom_tens_7sd = ZERO;
                 bottom_ones_7sd = ZERO;
             end
         endcase
     end
-
 
 endmodule
