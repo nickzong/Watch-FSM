@@ -11,9 +11,16 @@ module tb_watch;
     logic b_set = 0;
     logic b_plus = 0;
 
-    // watch outputs
-    logic[5:0] disp_pair1;
-    logic[5:0] disp_pair2;
+    // watch outputs -- display.sv is now instantiated inside watch.sv, so
+    // the DUT exposes 7-segment codes (and trigger_alarm) instead of the
+    // raw 6-bit disp_pair1/disp_pair2 it used to. The pair-level checks
+    // below still reach in via dut.disp_pair1/dut.disp_pair2 (the internal
+    // signals that feed display.sv) rather than decoding 7-segment codes.
+    logic[6:0] top_tens_7sd;
+    logic[6:0] top_ones_7sd;
+    logic[6:0] bottom_tens_7sd;
+    logic[6:0] bottom_ones_7sd;
+    logic trigger_alarm;
 
     int errors = 0;
 
@@ -29,8 +36,11 @@ module tb_watch;
         .b_mode_raw(b_mode),
         .b_set_raw(b_set),
         .b_plus_raw(b_plus),
-        .disp_pair1(disp_pair1),
-        .disp_pair2(disp_pair2)
+        .top_tens_7sd(top_tens_7sd),
+        .top_ones_7sd(top_ones_7sd),
+        .bottom_tens_7sd(bottom_tens_7sd),
+        .bottom_ones_7sd(bottom_ones_7sd),
+        .trigger_alarm(trigger_alarm)
     );
 
     // ------ HELPER FUNCTIONS ------
@@ -177,18 +187,18 @@ module tb_watch;
         set_press();  // idle -> set_hr
         check_eq(dut.a_state, 2'b01, "alarm sub-state is set_hr");
         blink_en = 0;
-        #1; check_eq(disp_pair1, 6'b111111, "disp_pair1 blanked while blink_en=0 in alarm set_hr");
+        #1; check_eq(dut.disp_pair1, 6'b111111, "disp_pair1 blanked while blink_en=0 in alarm set_hr");
         blink_en = 1;
-        #1; check_eq(disp_pair1, {1'b0, dut.alarm_hh}, "disp_pair1 shows alarm_hh while blink_en=1 in alarm set_hr");
+        #1; check_eq(dut.disp_pair1, {1'b0, dut.alarm_hh}, "disp_pair1 shows alarm_hh while blink_en=1 in alarm set_hr");
         plus_press_for(2);
-        #1; check_eq(disp_pair1, {1'b0, dut.alarm_hh}, "disp_pair1 tracks alarm_hh after plus presses (blink_en=1)");
+        #1; check_eq(dut.disp_pair1, {1'b0, dut.alarm_hh}, "disp_pair1 tracks alarm_hh after plus presses (blink_en=1)");
         check_eq(dut.alarm_hh, 5'd2, "alarm_hh incremented to 2 by two plus presses");
         set_press(); // set_hr -> set_min
         check_eq(dut.a_state, 2'b10, "alarm sub-state is set_min");
         blink_en = 0;
-        #1; check_eq(disp_pair2, 6'b111111, "disp_pair2 blanked while blink_en=0 in alarm set_min");
+        #1; check_eq(dut.disp_pair2, 6'b111111, "disp_pair2 blanked while blink_en=0 in alarm set_min");
         blink_en = 1;
-        #1; check_eq(disp_pair2, dut.alarm_mm, "disp_pair2 shows alarm_mm while blink_en=1 in alarm set_min");
+        #1; check_eq(dut.disp_pair2, dut.alarm_mm, "disp_pair2 shows alarm_mm while blink_en=1 in alarm set_min");
         set_press(); // set_min -> idle
         check_eq(dut.a_state, 2'b00, "alarm sub-state back to idle");
         mode_press(); // ALARM_VIEW -> TIME, only legal now that a_state is idle
@@ -213,12 +223,12 @@ module tb_watch;
         check_eq(dut.state, 2'b11, "trigger_alarm forces state to ALARM_RING from anywhere");
         blink_en = 0;
         #1;
-        check_eq(disp_pair1, 6'b111111, "disp_pair1 blanked while blink_en=0 in ALARM_RING");
-        check_eq(disp_pair2, 6'b111111, "disp_pair2 blanked while blink_en=0 in ALARM_RING");
+        check_eq(dut.disp_pair1, 6'b111111, "disp_pair1 blanked while blink_en=0 in ALARM_RING");
+        check_eq(dut.disp_pair2, 6'b111111, "disp_pair2 blanked while blink_en=0 in ALARM_RING");
         blink_en = 1;
         #1;
-        check_eq(disp_pair1, {1'b0, dut.time_hh}, "disp_pair1 shows time_hh while blink_en=1 in ALARM_RING");
-        check_eq(disp_pair2, dut.time_mm, "disp_pair2 shows time_mm while blink_en=1 in ALARM_RING");
+        check_eq(dut.disp_pair1, {1'b0, dut.time_hh}, "disp_pair1 shows time_hh while blink_en=1 in ALARM_RING");
+        check_eq(dut.disp_pair2, dut.time_mm, "disp_pair2 shows time_mm while blink_en=1 in ALARM_RING");
         release dut.trigger_alarm;
         mode_press(); // any press should silence the ring and return to TIME
         check_eq(dut.state, 2'b00, "a button press silences ALARM_RING back to TIME");

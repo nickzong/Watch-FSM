@@ -6,8 +6,10 @@ module watch (
     input logic b_set_raw,
     input logic b_plus_raw,
     
-    output logic[5:0] disp_pair1,
-    output logic[5:0] disp_pair2,
+    output logic[6:0] top_tens_7sd,
+    output logic[6:0] top_ones_7sd,
+    output logic[6:0] bottom_tens_7sd,
+    output logic[6:0] bottom_ones_7sd,
     output logic trigger_alarm
 );
 
@@ -15,6 +17,8 @@ module watch (
     logic[1:0] c_state; // tracker for the current clock state
     logic[1:0] a_state; // tracker for the current alarm state
     logic s_carry;
+    logic[5:0] disp_pair1;
+    logic[5:0] disp_pair2;
 
     // internal registers used to store time for all three modes
     logic[5:0] time_ss; 
@@ -101,6 +105,16 @@ module watch (
         .state(a_state),
         .alarm_mm(alarm_mm),
         .alarm_hh(alarm_hh)
+    );
+
+    display u_display (
+        .clk(clk),
+        .top_pair(disp_pair1),
+        .bottom_pair(disp_pair2),
+        .top_tens_7sd(top_tens_7sd),
+        .top_ones_7sd(top_ones_7sd),
+        .bottom_tens_7sd(bottom_tens_7sd),
+        .bottom_ones_7sd(bottom_ones_7sd)
     );
 
     always_comb begin
