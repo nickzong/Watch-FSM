@@ -1,7 +1,5 @@
 module mod_counter #(
-  // STEPS should always be less than or equal to REG_SIZE
-  // MIN or SEC: STEPS = 60, REG_SIZE = 6
-  // HR: STEP = 24, REG_SIZE = 5
+  // STEPS should be 60 for mm/ss and 24 for hh, REG_SIZE = 6 for consistency
   parameter int STEPS = 60,
   parameter int REG_SIZE = 6
 ) (

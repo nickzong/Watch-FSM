@@ -16,7 +16,7 @@ module tb_alarm_view;
     // test_clock outputs, fed into alarm_view as the current hh:mm
     logic[5:0] ss;
     logic[5:0] mm;
-    logic[4:0] hh;
+    logic[5:0] hh;
     logic s_carry;
 
     // alarm_view inputs
@@ -27,7 +27,7 @@ module tb_alarm_view;
     // alarm_view outputs
     logic trigger_alarm;
     logic[5:0] alarm_mm;
-    logic[4:0] alarm_hh;
+    logic[5:0] alarm_hh;
 
     int errors = 0;
 

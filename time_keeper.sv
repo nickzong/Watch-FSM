@@ -10,7 +10,7 @@ module time_keeper (
   
   output logic[5:0] ss,
   output logic[5:0] mm,
-  output logic[4:0] hh,
+  output logic[5:0] hh,
   output logic s_carry
 );
   
@@ -30,7 +30,7 @@ module time_keeper (
     .out(mm),
     .carry(m_carry)
   );
-  mod_counter #(.STEPS(24), .REG_SIZE(5)) u_hr (
+  mod_counter #(.STEPS(24), .REG_SIZE(6)) u_hr (
     .clk(clk),
     .areset(areset),
     .inc(m_carry || inc_hr_pulse),

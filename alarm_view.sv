@@ -5,12 +5,12 @@ module alarm_view ( // trigger ring when clock time (hh:mm:ss) == alarm time (hh
     input logic set_state, // set button
     input logic s_carry, // 1 only on second rollover
     input logic[5:0] mm,
-    input logic[4:0] hh,
+    input logic[5:0] hh,
 
     output logic trigger_alarm,
     output logic[1:0] state = 2'b00, // cycles alarm_view (00) --> set_hr (01) --> set_min (10) --> confirm alarm (00)
     output logic[5:0] alarm_mm,
-    output logic[4:0] alarm_hh
+    output logic[5:0] alarm_hh
 );
 
     logic armed = 0; // interal flag - if alarm is on/off

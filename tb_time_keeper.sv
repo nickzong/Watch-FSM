@@ -11,7 +11,7 @@ module tb_time_keeper;
   
   logic[5:0] ss;
   logic[5:0] mm;
-  logic[4:0] hh;
+  logic[5:0] hh;
 
   int errors = 0;
   

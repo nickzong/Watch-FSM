@@ -9,7 +9,7 @@ module clock (
     output logic[1:0] state = 2'b00, // cycles time (00) --> set_hr (01) --> set_min (10) --> confirm time (00)
     output logic[5:0] ss,
     output logic[5:0] mm,
-    output logic[4:0] hh
+    output logic[5:0] hh
 );
 
     always_ff @(posedge set) begin
