@@ -1,9 +1,3 @@
-// clk_rst, finish button, maybe put each hh, mm, ss as internal logic 
-// and replace with two output logic regs called first_two and last_two. 
-// add to the mode cycle an update of which two are being used to display currently
-// add blinking when setting hr and min
-
-// ADD ARESET CAPABILITIES TO OTHER MODULES
 module watch (
     input logic clk,
     input logic tick_1Hz,
@@ -25,11 +19,11 @@ module watch (
     // internal registers used to store time for all three modes
     logic[5:0] time_ss; 
     logic[5:0] time_mm;
-    logic[4:0] time_hh;
+    logic[5:0] time_hh;
     logic[5:0] sw_ss;
     logic[5:0] sw_mm;
     logic[5:0] alarm_mm;
-    logic[4:0] alarm_hh;
+    logic[5:0] alarm_hh;
 
     // signals for watch mode instances' inputs
     logic fact_rst; // when in time state, if all three buttons are pressed at once, factory reset everything
@@ -126,7 +120,8 @@ module watch (
             default: next_state = state;
         endcase
         
-        // display output logic
+        // ------ DISPLAY OUTPUT LOGIC ------
+        // The 111111 state represents a "display nothing state" to drive display blinking
         case (state)
             2'b00: begin
                 case (c_state) 
@@ -135,12 +130,12 @@ module watch (
                         disp_pair2 = time_mm;
                     end
                     2'b01: begin // set_hr
-                        disp_pair1 = (blink_en) ? time_hh : '0;
+                        disp_pair1 = (blink_en) ? time_hh : 6'b111111;
                         disp_pair2 = time_mm;
                     end
                     2'b10: begin // set_min
                         disp_pair1 = time_hh;
-                        disp_pair2 = (blink_en) ? time_mm : '0;
+                        disp_pair2 = (blink_en) ? time_mm : 6'b111111;
                     end
                     default: begin
                         disp_pair1 = time_hh;
@@ -159,12 +154,12 @@ module watch (
                         disp_pair2 = alarm_mm;
                     end
                     2'b01: begin // set_hr
-                        disp_pair1 = (blink_en) ? alarm_hh : '0;
+                        disp_pair1 = (blink_en) ? alarm_hh : 6'b111111;
                         disp_pair2 = alarm_mm;
                     end
                     2'b10: begin // set_min
                         disp_pair1 = alarm_hh;
-                        disp_pair2 = (blink_en) ? alarm_mm : '0;
+                        disp_pair2 = (blink_en) ? alarm_mm : 6'b111111;
                     end
                     default: begin
                         disp_pair1 = alarm_hh;
@@ -173,15 +168,15 @@ module watch (
                 endcase
             end
             2'b11: begin
-                disp_pair1 = (blink_en) ? time_hh : '0;
-                disp_pair2 = (blink_en) ? time_mm : '0;
+                disp_pair1 = (blink_en) ? time_hh : 6'b111111;
+                disp_pair2 = (blink_en) ? time_mm : 6'b111111;
             end
             default:  begin
                 disp_pair1 = time_hh;
+                disp_pair1[5] = 1'b0;
                 disp_pair2 = time_mm;
             end
         endcase
-
     end
 
     always_ff @(posedge clk, posedge fact_rst) begin
@@ -190,5 +185,7 @@ module watch (
     end
     
     assign fact_rst = b_mode & b_set & b_plus;
+
+    assign blink_tens = (state == 2'b00) && (state)
     
 endmodule
