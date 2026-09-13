@@ -170,7 +170,6 @@ module watch (
             end
             default:  begin
                 disp_pair1 = time_hh;
-                disp_pair1[5] = 1'b0;
                 disp_pair2 = time_mm;
             end
         endcase

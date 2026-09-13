@@ -195,8 +195,8 @@ module display (
                 top_tens_7sd = FOUR;
                 top_ones_7sd = ONE;
             end
-            6'd24: begin
-                top_tens_7sd = ZFOUR
+            6'd42: begin
+                top_tens_7sd = FOUR;
                 top_ones_7sd = TWO;
             end
             6'd43: begin
@@ -452,8 +452,8 @@ module display (
                 bottom_tens_7sd = FOUR;
                 bottom_ones_7sd = ONE;
             end
-            6'd24: begin
-                bottom_tens_7sd = ZFOUR
+            6'd42: begin
+                bottom_tens_7sd = FOUR;
                 bottom_ones_7sd = TWO;
             end
             6'd43: begin

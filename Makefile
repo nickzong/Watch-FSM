@@ -1,5 +1,5 @@
 # all module files
-DESIGN = mod_counter.sv time_keeper.sv stopwatch.sv alarm_view.sv clock.sv debouncer.sv watch.sv
+DESIGN = mod_counter.sv time_keeper.sv stopwatch.sv alarm_view.sv clock.sv debouncer.sv watch.sv display.sv
 TB = tb_watch.sv # TUNE ME
 
 VVP_FILE = sim.vvp
