@@ -37,19 +37,16 @@ module watch (
     // filter noisy button inputs
     debouncer mode_filter (
         .clk(clk),
-        .areset(fact_rst),
         .raw(b_mode_raw),
         .clean(b_mode)
     );
     debouncer set_filter (
         .clk(clk),
-        .areset(fact_rst),
         .raw(b_set_raw),
         .clean(b_set)
     );
     debouncer plus_filter (
         .clk(clk),
-        .areset(fact_rst),
         .raw(b_plus_raw),
         .clean(b_plus)
     );
@@ -185,7 +182,5 @@ module watch (
     end
     
     assign fact_rst = b_mode & b_set & b_plus;
-
-    assign blink_tens = (state == 2'b00) && (state)
     
 endmodule

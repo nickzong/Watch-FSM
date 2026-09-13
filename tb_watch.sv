@@ -177,7 +177,7 @@ module tb_watch;
         set_press();  // idle -> set_hr
         check_eq(dut.a_state, 2'b01, "alarm sub-state is set_hr");
         blink_en = 0;
-        #1; check_eq(disp_pair1, 6'd0, "disp_pair1 blanked while blink_en=0 in alarm set_hr");
+        #1; check_eq(disp_pair1, 6'b111111, "disp_pair1 blanked while blink_en=0 in alarm set_hr");
         blink_en = 1;
         #1; check_eq(disp_pair1, {1'b0, dut.alarm_hh}, "disp_pair1 shows alarm_hh while blink_en=1 in alarm set_hr");
         plus_press_for(2);
@@ -186,7 +186,7 @@ module tb_watch;
         set_press(); // set_hr -> set_min
         check_eq(dut.a_state, 2'b10, "alarm sub-state is set_min");
         blink_en = 0;
-        #1; check_eq(disp_pair2, 6'd0, "disp_pair2 blanked while blink_en=0 in alarm set_min");
+        #1; check_eq(disp_pair2, 6'b111111, "disp_pair2 blanked while blink_en=0 in alarm set_min");
         blink_en = 1;
         #1; check_eq(disp_pair2, dut.alarm_mm, "disp_pair2 shows alarm_mm while blink_en=1 in alarm set_min");
         set_press(); // set_min -> idle
@@ -213,8 +213,8 @@ module tb_watch;
         check_eq(dut.state, 2'b11, "trigger_alarm forces state to ALARM_RING from anywhere");
         blink_en = 0;
         #1;
-        check_eq(disp_pair1, 6'd0, "disp_pair1 blanked while blink_en=0 in ALARM_RING");
-        check_eq(disp_pair2, 6'd0, "disp_pair2 blanked while blink_en=0 in ALARM_RING");
+        check_eq(disp_pair1, 6'b111111, "disp_pair1 blanked while blink_en=0 in ALARM_RING");
+        check_eq(disp_pair2, 6'b111111, "disp_pair2 blanked while blink_en=0 in ALARM_RING");
         blink_en = 1;
         #1;
         check_eq(disp_pair1, {1'b0, dut.time_hh}, "disp_pair1 shows time_hh while blink_en=1 in ALARM_RING");
