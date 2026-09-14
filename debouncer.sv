@@ -8,7 +8,7 @@ module debouncer #(
     output logic clean = 0 // filtered 
 );
 
-    logic[$clog2(THRESHOLD)-1:0] count = 0;
+    logic[$clog2(THRESHOLD+1)-1:0] count = 0;
 
     always_ff @(posedge clk) begin
         if (raw == clean) begin // no bounce occurs
