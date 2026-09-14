@@ -258,10 +258,10 @@ module tb_watch;
         mode_press(); // ALARM_VIEW -> TIME
         check_eq(dut.state, 2'b00, "back in TIME for the next priority check");
 
-        // 5. AMSP priority: set beats plus when pressed together
+        // 4. AMSP priority: set beats plus when pressed together
         press_together(0, 1, 1);
 
-        // 6. factory reset again to get back to a clean, known state before the
+        // 5. factory reset again to get back to a clean, known state before the
         //    alarm-set / blink checks below (step 4 may have nudged c_state via
         //    the set pulse depending on how u_clock.set is wired -- see step 7)
         hold_all_three_staggered();
@@ -269,7 +269,7 @@ module tb_watch;
         check_eq(dut.state, 2'b00, "state is TIME after second factory reset");
         check_eq(dut.a_state, 2'b00, "alarm sub-state is idle after second factory reset");
 
-        // 7. enter ALARM_VIEW, cycle into its set_hr/set_min, and check blinking
+        // 6. enter ALARM_VIEW, cycle into its set_hr/set_min, and check blinking
         mode_press(); // TIME -> STOPWATCH
         mode_press(); // STOPWATCH -> ALARM_VIEW
         check_eq(dut.state, 2'b10, "state is ALARM_VIEW");
@@ -293,7 +293,7 @@ module tb_watch;
         mode_press(); // ALARM_VIEW -> TIME, only legal now that a_state is idle
         check_eq(dut.state, 2'b00, "mode press returns to TIME now that alarm sub-state is idle");
 
-        // 8. entering the clock's own set_hr from TIME -- confirms u_clock's
+        // 7. entering the clock's own set_hr from TIME -- confirms u_clock's
         //    .set(...) is gated on (state==2'b00), matching .plus(...)
         check_eq(dut.state, 2'b00, "confirm in TIME before testing clock set-entry");
         set_press();
@@ -302,7 +302,7 @@ module tb_watch;
         set_press(); // set_min -> idle, back to a clean state
         check_eq(dut.c_state, 2'b00, "clock sub-state back to idle");
 
-        // 9. ALARM_RING: force trigger_alarm directly to test the FSM's reaction
+        // 8. ALARM_RING: force trigger_alarm directly to test the FSM's reaction
         //    without re-deriving alarm_view's own hh:mm match logic (already
         //    covered by tb_alarm_view.sv)
         hold_all_three_staggered();

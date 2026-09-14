@@ -1,6 +1,7 @@
 module watch (
     input logic clk,
     input logic tick_1Hz,
+    input logic blink_en, // 2 Hz signal to drive blinking in set modes
     input logic b_mode_raw,
     input logic b_set_raw,
     input logic b_plus_raw,
@@ -31,7 +32,6 @@ module watch (
     // signals for watch mode instances' inputs
     logic fact_rst; // when in time state, if all three buttons are pressed at once, factory reset everything
     logic true_mode, true_set, true_plus; // encodes AMSP hierarchy
-    logic blink_en; // 2 Hz signal to drive blinking in set modes
 
     // ------ PROCESS BUTTON INPUTS ------
     logic b_mode, b_mode_prev, mode_pulse;
@@ -115,11 +115,6 @@ module watch (
         .top_ones_7sd(top_ones_7sd),
         .bottom_tens_7sd(bottom_tens_7sd),
         .bottom_ones_7sd(bottom_ones_7sd)
-    );
-
-    blink_signal u_blink (
-        .clk(clk),
-        .blink_en(blink_en)
     );
 
     always_comb begin
