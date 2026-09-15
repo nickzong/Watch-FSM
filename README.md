@@ -47,6 +47,39 @@ make          # build and run all testbenches
 
 (Developed in VS Code with the Icarus Verilog toolchain.)
 
+**Sample output** (`tb_watch.sv`, the top-level integration testbench):
+
+```
+PASS: single mode press: TIME -> STOPWATCH (=1) at t=9150000
+PASS: state advanced on mode's transition, not plus's (=1) at t=23780000
+PASS: disp_pair1 shows alarm_hh while blink_en=1 in alarm set_hr (=0) at t=55352000
+PASS: trigger_alarm forces state to ALARM_RING from anywhere (=3) at t=93360000
+PASS: disp_pair1 shows time_hh while blink_en=1 in ALARM_RING (=0) at t=93362000
+PASS: a button press silences ALARM_RING back to TIME (=0) at t=97570000
+
+ALL CHECKS PASSED
+```
+
+## Waveforms
+
+**Button debounce + edge-detected pulse**
+
+![Debounce and pulse generation waveform](./docs/waveform_debounce.png)
+
+- **raw**: the raw mode button input signal
+- **clean**: the processed mode button input signal
+- **mode_pulse**: resultant pulse that fires when raw input is held longer than THRESHOLD value (200 clk cycles)
+- **state [1:0]**: state tracker cycles through idle --> set_hr --> set_min 
+
+**AMSP priority resolution (mode beats plus when pressed together)**
+
+![AMSP priority waveform](./docs/waveform_amsp.png)
+
+- mode > set is shown at 20,000,000 ps
+- mode > plus is shown at ~26,000,000 ps
+- set > plus is shown at 40,000,000 ps
+- mode dominates when all three are pressed at once (~47,000,000 ps)
+
 ## Status
 
 - [x] FSM design and simulation (SystemVerilog / Icarus Verilog)
