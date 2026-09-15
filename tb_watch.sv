@@ -250,6 +250,9 @@ module tb_watch;
         mode_press();
         check_eq(dut.state, 2'b00, "single mode press: ALARM_VIEW -> TIME (a_state was idle)");
 
+        // 4. AMSP priority: mode beats set when pressed together
+        press_together(1, 1, 0);
+
         // 4. AMSP priority: mode beats plus when pressed together
         press_together(1, 0, 1);
         check_eq(dut.state, 2'b01, "state advanced on mode's transition, not plus's");
@@ -260,6 +263,9 @@ module tb_watch;
 
         // 4. AMSP priority: set beats plus when pressed together
         press_together(0, 1, 1);
+
+        // 4. AMSP priority: all press
+        press_together(1, 1, 1);
 
         // 5. factory reset again to get back to a clean, known state before the
         //    alarm-set / blink checks below (step 4 may have nudged c_state via
