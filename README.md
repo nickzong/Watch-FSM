@@ -16,7 +16,7 @@ Three buttons (Mode / Set / Plus) are reused contextually across modes, plus an 
 
 ![Watch-FSM state diagram, state table, and seven-segment truth table](./docs/state_diagram.png)
 
-See [`watch_diagrams.pdf`](./watch_diagrams.pdf) for the full-resolution/zoomable version.
+See [`state_diagrams.pdf`](./docs/state_diagrams.pdf) for the full-resolution/zoomable version.
 
 ## Design
 
