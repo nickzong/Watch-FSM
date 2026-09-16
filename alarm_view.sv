@@ -27,13 +27,8 @@ module alarm_view ( // trigger ring when clock time (hh:mm:ss) == alarm time (hh
                 default: state <= 2'b00;
             endcase
         end
+        else if (plus && state == 2'b00) armed <= ~armed; // alarm toggle
     end
-
-    // alarm toggle
-    always_ff @(posedge plus) begin
-        if (state == 2'b00) armed <= ~armed;
-    end
-
 
     time_keeper u_alarm (
         .clk(clk), 
