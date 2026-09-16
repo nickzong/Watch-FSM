@@ -254,10 +254,12 @@ module tb_watch;
         press_together(1, 1, 0);
 
         // 4. AMSP priority: mode beats plus when pressed together
+        // note: the previous press_together(1, 1, 0) call already won mode's
+        // priority and drove a real mode transition (TIME -> STOPWATCH), so
+        // this second mode-priority win advances STOPWATCH -> ALARM_VIEW
         press_together(1, 0, 1);
-        check_eq(dut.state, 2'b01, "state advanced on mode's transition, not plus's");
+        check_eq(dut.state, 2'b10, "state advanced on mode's transition, not plus's");
         check_eq(dut.time_hh, 5'd0, "time_hh untouched -- plus's action was suppressed");
-        mode_press(); // STOPWATCH -> ALARM_VIEW, back toward TIME for the next check
         mode_press(); // ALARM_VIEW -> TIME
         check_eq(dut.state, 2'b00, "back in TIME for the next priority check");
 
