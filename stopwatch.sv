@@ -11,11 +11,11 @@ module stopwatch (
     logic running = 0;
     logic clear_timer = 0; // decided once per areset press, sampled BEFORE running clears
 
-    always_ff @(posedge set, posedge areset) begin
+    always_ff @(posedge clk, posedge areset) begin
         if (areset) begin
             clear_timer <= !running;
             running     <= 1'b0;
-        end else begin
+        end else if (set) begin
             clear_timer <= 1'b0;
             running     <= ~running;
         end

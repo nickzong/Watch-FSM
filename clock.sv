@@ -12,17 +12,16 @@ module clock (
     output logic[5:0] hh
 );
 
-    always_ff @(posedge set) begin
-        case (state)
-            2'b00: state <= 2'b01;    // time --> set_hr
-            2'b01: state <= 2'b10;    // set_hr --> set_min
-            2'b10: state <= 2'b00;    // set_min --> time
-            default: state <= 2'b00;
-        endcase
-    end
-
-    always_ff @(posedge areset) begin
-        state <= 2'b00;
+    always_ff @(posedge clk, posedge areset) begin
+        if (areset) state <= 2'b00;
+        else if (set) begin
+            case (state)
+                2'b00: state <= 2'b01;    // time --> set_hr
+                2'b01: state <= 2'b10;    // set_hr --> set_min
+                2'b10: state <= 2'b00;    // set_min --> time
+                default: state <= 2'b00;
+            endcase
+        end
     end
 
     time_keeper u_time (
